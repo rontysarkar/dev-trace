@@ -33,7 +33,7 @@ const validateUser = async (email: string, password: string) => {
   if (!isMatch) {
     return null;
   }
-  
+  delete result.rows[0].password;
   return result.rows[0];
 };
 

@@ -2,6 +2,8 @@ import type { Request, Response } from "express";
 import { authService } from "./auth.service";
 import { sendResponse } from "../../utils";
 import type { RUser } from "./auth.interface";
+import jwt from 'jsonwebtoken'
+import config from "../../config";
 
 const signup = async (req: Request, res: Response) => {
   try {
@@ -12,6 +14,8 @@ const signup = async (req: Request, res: Response) => {
       message: "User registered successfully",
       data: result,
     });
+
+
   } catch (error: any) {
     console.log(error);
     sendResponse<any>(res, {
@@ -34,7 +38,18 @@ const login = async (req: Request, res: Response) => {
         message: "incorrect email or password",
       });
     }
-    console.log(user);
+
+    const payload = {
+        id:user.id,
+        name:user.name,
+        role:user.role,
+    }
+    const token = jwt.sign(payload,config.jwt_access_secret as string,{expiresIn:'1d'});
+    
+    sendResponse(res,{statusCode:200,success:true,message:"Login successfully",data:{
+        token,
+        user,
+    }})
   } catch (error: any) {
     console.log(error);
     sendResponse<any>(res, {
