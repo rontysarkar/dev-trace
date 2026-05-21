@@ -4,3 +4,5 @@ export type ReqUser = {
     name:string,
     email:string,
 }
+
+export type Role = 'maintainer' | 'contributor';

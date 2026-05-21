@@ -3,8 +3,9 @@ import { sendResponse } from "../utils";
 import jwt, { type JwtPayload } from "jsonwebtoken";
 import config from "../config";
 import { authService } from "../api/auth/auth.service";
+import type { Role } from "../types";
 
-const auth = () => {
+const auth = (...roles:Role[]) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
       const token = req.headers.authorization;
@@ -28,6 +29,13 @@ const auth = () => {
           success: false,
           message: "User not found",
           error: "Unauthorized access",
+        });
+      }
+      if(!roles.includes(user?.role)){
+        return sendResponse(res, {
+          statusCode: 403,
+          success: false,
+          message: "Forbidden Access",
         });
       }
       req.user = {
