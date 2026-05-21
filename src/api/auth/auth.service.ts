@@ -3,8 +3,7 @@ import type { User } from "./auth.interface";
 import bcrypt from "bcrypt";
 
 const createUser = async (payload: User) => {
-  let { name, email, password, role } = payload;
-  if (role != "maintainer") role = "contributor";
+  const { name, email, password, role } = payload;
   const hash = await bcrypt.hash(password, 10);
   const result = await pool.query(
     `
@@ -37,7 +36,16 @@ const validateUser = async (email: string, password: string) => {
   return result.rows[0];
 };
 
+const getUserById = async(id:string) =>{
+
+  const user = await pool.query(`
+    SELECT * FROM users WHERE id = $1
+  `,[id]);
+  return user.rows[0];
+}
+
 export const authService = {
   createUser,
   validateUser,
+  getUserById,
 };
