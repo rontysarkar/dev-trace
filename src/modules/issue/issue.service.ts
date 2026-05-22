@@ -36,9 +36,13 @@ const getSingleIssueByIdWithUser = async(id:number) =>{
     const user = await pool.query(`
         SELECT id,name,role FROM users WHERE id=$1;
     `,[issue.rows[0].reporter_id])
+
+    const {created_at,updated_at,...remainingData} = issue.rows[0];
     const issueWithUser = {
-        ...issue.rows[0],
+        ...remainingData,
         reporter:user.rows[0],
+        created_at,
+        updated_at,
     }
     delete issueWithUser.reporter_id;
     return issueWithUser as RIssue
