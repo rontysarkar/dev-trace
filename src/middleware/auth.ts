@@ -2,10 +2,10 @@ import type { NextFunction, Request, Response } from "express";
 import { sendResponse } from "../utils";
 import jwt, { type JwtPayload } from "jsonwebtoken";
 import config from "../config";
-import { authService } from "../api/auth/auth.service";
+import { authService } from "../modules/auth/auth.service";
 import type { Role } from "../types";
 
-const auth = (...roles:Role[]) => {
+const auth = (...roles: Role[]) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
       const token = req.headers.authorization;
@@ -31,7 +31,7 @@ const auth = (...roles:Role[]) => {
           error: "Unauthorized access",
         });
       }
-      if(!roles.includes(user?.role)){
+      if (!roles.includes(user?.role)) {
         return sendResponse(res, {
           statusCode: 403,
           success: false,
