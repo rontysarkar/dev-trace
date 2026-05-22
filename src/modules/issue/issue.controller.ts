@@ -4,8 +4,7 @@ import { sendResponse } from "../../utils";
 
 const createIssue = async (req: Request, res: Response) => {
   try {
-    
-    const result = await issueService.createIssueIntoDb(req.body,req.user.id);
+    const result = await issueService.createIssueIntoDb(req.body, req.user.id);
     sendResponse(res, {
       statusCode: 201,
       success: true,
@@ -31,9 +30,12 @@ const getAllIssues = async (req: Request, res: Response) => {
     }, {});
 
     const issuesWithUser = issues.map((issue) => {
+      const { created_at, updated_at, ...remainingData } = issue;
       const updatedIssue = {
-        ...issue,
+        ...remainingData,
         reporter: lookup[`${issue.reporter_id}`],
+        created_at,
+        updated_at,
       };
       delete updatedIssue.reporter_id;
       return updatedIssue;
@@ -74,23 +76,30 @@ const getSingleIssue = async (req: Request, res: Response) => {
   }
 };
 
-const updateIssue = async(req:Request,res:Response) =>{
+const updateIssue = async (req: Request, res: Response) => {
   try {
-    if(req.user.role === 'contributor'){
+    if (req.user.role === "contributor") {
       const issue = await issueService.getSingleIssue(Number(req.params?.id));
-      if(req.user.id !== issue.reporter_id || issue.status !== 'open'){
-       return sendResponse(res,{statusCode:403,success:false,message:'Forbidden access',error:"contributor can not update this issue"})
+      if (req.user.id !== issue.reporter_id || issue.status !== "open") {
+        return sendResponse(res, {
+          statusCode: 403,
+          success: false,
+          message: "Forbidden access",
+          error: "contributor can not update this issue",
+        });
       }
     }
 
-    const result = await issueService.updatedIssueIntoDb(req.body,Number(req.params?.id));
+    const result = await issueService.updatedIssueIntoDb(
+      req.body,
+      Number(req.params?.id),
+    );
     sendResponse(res, {
       statusCode: 200,
       success: true,
       message: "Issue updated successfully",
       data: result,
     });
-
   } catch (error: any) {
     // console.log(error);
     sendResponse(res, {
@@ -100,12 +109,16 @@ const updateIssue = async(req:Request,res:Response) =>{
       error: error,
     });
   }
-}
+};
 
-const deleteIssue = async(req:Request,res:Response)=>{
-  try{
-    const result = await issueService.deleteIssueFromDb(Number(req.params?.id))
-    sendResponse(res,{statusCode:200,success:true,message:"Issue deleted successfully"})
+const deleteIssue = async (req: Request, res: Response) => {
+  try {
+    const result = await issueService.deleteIssueFromDb(Number(req.params?.id));
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: "Issue deleted successfully",
+    });
   } catch (error: any) {
     // console.log(error);
     sendResponse(res, {
@@ -115,7 +128,7 @@ const deleteIssue = async(req:Request,res:Response)=>{
       error: error,
     });
   }
-}
+};
 
 export const issueController = {
   createIssue,
