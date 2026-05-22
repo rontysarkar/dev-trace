@@ -12,7 +12,7 @@ app.use("/api/auth", authRoute);
 app.use("/api/issues", issueRoute);
 
 app.get("/", (req: Request, res: Response) => {
-  res.send("Hello World");
+  res.send("Server is Running");
 });
 
 export default app;
