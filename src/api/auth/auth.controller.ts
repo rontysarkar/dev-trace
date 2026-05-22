@@ -17,7 +17,7 @@ const signup = async (req: Request, res: Response) => {
 
 
   } catch (error: any) {
-    console.log(error);
+    // console.log(error);
     sendResponse<any>(res, {
       statusCode: 500,
       success: false,
@@ -51,7 +51,7 @@ const login = async (req: Request, res: Response) => {
         user,
     }})
   } catch (error: any) {
-    console.log(error);
+    // console.log(error);
     sendResponse<any>(res, {
       statusCode: 500,
       success: false,

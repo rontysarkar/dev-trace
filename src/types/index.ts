@@ -2,7 +2,7 @@
 export type ReqUser = {
     id:number,
     name:string,
-    email:string,
+    role:string,
 }
 
 export type Role = 'maintainer' | 'contributor';

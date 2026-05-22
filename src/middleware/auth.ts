@@ -41,11 +41,11 @@ const auth = (...roles:Role[]) => {
       req.user = {
         id: user.id,
         name: user.name,
-        email: user.email,
+        role: user.role,
       };
       next();
     } catch (error: any) {
-      console.log(error);
+      // console.log(error);
       return sendResponse(res, {
         statusCode: 401,
         success: false,
