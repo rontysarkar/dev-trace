@@ -23,7 +23,9 @@ const createIssue = async (req: Request, res: Response) => {
 
 const getAllIssues = async (req: Request, res: Response) => {
   try {
-    const { issues, users } = await issueService.gelAllIssuesAndUserFromDb();
+    const { issues, users } = await issueService.gelAllIssuesAndUserFromDb(
+      req.query,
+    );
     const lookup = users.reduce((table, post) => {
       table[post.id] = post;
       return table;

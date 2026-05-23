@@ -1,8 +1,14 @@
 import { pool } from "../../config/db";
-import type { IIssue, RIssue, RReporter, UpdateIssue } from "./issue.interface";
+import type {
+  IIssue,
+  QueryParams,
+  RIssue,
+  RReporter,
+  UpdateIssue,
+} from "./issue.interface";
 
-const createIssueIntoDb = async (payload: IIssue,reporter_id:number) => {
-  const { description, type, status,title } = payload;
+const createIssueIntoDb = async (payload: IIssue, reporter_id: number) => {
+  const { description, type, status, title } = payload;
   const result = await pool.query(
     `
         INSERT INTO issues(title,description,type,status,reporter_id)
@@ -14,74 +20,107 @@ const createIssueIntoDb = async (payload: IIssue,reporter_id:number) => {
   return result.rows[0];
 };
 
-const gelAllIssuesAndUserFromDb = async () => {
-  const issues = await pool.query(`
-        SELECT * FROM issues;
-    `);
-    const users = await pool.query(`
+const gelAllIssuesAndUserFromDb = async (query: QueryParams) => {
+  const { sort, status, type } = query;
+  let queryText = ` SELECT * FROM issues WHERE 1=1`;
+  let queryParams = [];
+  let paramsIndex = 1;
+  if (type && (type === "bug" || type === "feature_request")) {
+    queryText += ` AND type=$${paramsIndex}`;
+    queryParams.push(type);
+    paramsIndex++;
+  }
+
+  if (
+    status &&
+    (status === "in_progress" || status === "open" || status === "resolved")
+  ) {
+    queryText += ` AND status = $${paramsIndex}`;
+    queryParams.push(status);
+    paramsIndex++;
+  }
+  if (sort !== "oldest") {
+    queryText += " ORDER BY created_at DESC";
+  }
+  
+  const issues = await pool.query(queryText, queryParams);
+  const users = await pool.query(`
         SELECT id,name,role FROM users;
-    `)
-  return {issues:issues.rows,users:users.rows};
+    `);
+  return { issues: issues.rows, users: users.rows };
 };
 
-const getSingleIssueByIdWithUser = async(id:number) =>{
-
-    const issue = await pool.query(`
+const getSingleIssueByIdWithUser = async (id: number) => {
+  const issue = await pool.query(
+    `
         SELECT * FROM issues WHERE id =$1;
-    `,[id])
-    if(issue.rows.length === 0){
-      throw new Error('issue not found');
-      return;
-    }
-    const user = await pool.query(`
+    `,
+    [id],
+  );
+  if (issue.rows.length === 0) {
+    throw new Error("issue not found");
+    return;
+  }
+  const user = await pool.query(
+    `
         SELECT id,name,role FROM users WHERE id=$1;
-    `,[issue.rows[0].reporter_id])
+    `,
+    [issue.rows[0].reporter_id],
+  );
 
-    const {created_at,updated_at,...remainingData} = issue.rows[0];
-    const issueWithUser = {
-        ...remainingData,
-        reporter:user.rows[0],
-        created_at,
-        updated_at,
-    }
-    delete issueWithUser.reporter_id;
-    return issueWithUser as RIssue
-    
-}
+  const { created_at, updated_at, ...remainingData } = issue.rows[0];
+  const issueWithUser = {
+    ...remainingData,
+    reporter: user.rows[0],
+    created_at,
+    updated_at,
+  };
+  delete issueWithUser.reporter_id;
+  return issueWithUser as RIssue;
+};
 
-const updatedIssueIntoDb = async(payload:UpdateIssue,id:number)=>{
-  const {title,description,type} = payload;
-  const result = await pool.query(`
+const updatedIssueIntoDb = async (payload: UpdateIssue, id: number) => {
+  const { title, description, type } = payload;
+  const result = await pool.query(
+    `
     UPDATE issues
     SET title = COALESCE($1,title),description = COALESCE($2,description),type=COALESCE($3,type)
     WHERE id = $4 RETURNING *;
-  `,[title,description,type,id]);
-  if(result.rows.length === 0){
-    throw new Error('Issue not found');
+  `,
+    [title, description, type, id],
+  );
+  if (result.rows.length === 0) {
+    throw new Error("Issue not found");
   }
   return result.rows[0];
-}
+};
 
-const getSingleIssue = async(id:number)=>{
-  const result = await pool.query(`
+const getSingleIssue = async (id: number) => {
+  const result = await pool.query(
+    `
     SELECT * FROM issues WHERE id=$1;
-  `,[id]);
-  if(result.rows.length === 0){
-    throw new Error('Issue not found');
+  `,
+    [id],
+  );
+  if (result.rows.length === 0) {
+    throw new Error("Issue not found");
   }
   return result.rows[0];
-}
+};
 
-const deleteIssueFromDb = async(id:number)=>{
-  const result = await pool.query(`
+const deleteIssueFromDb = async (id: number) => {
+  const result = await pool.query(
+    `
     DELETE FROM issues WHERE id=$1;
-  `,[id]);
+  `,
+    [id],
+  );
 
-  if(result.rowCount === 0){
-    throw new Error('Issue not found');
+  if (result.rowCount === 0) {
+    throw new Error("Issue not found");
   }
   return;
-}
+};
 
 export const issueService = {
   createIssueIntoDb,

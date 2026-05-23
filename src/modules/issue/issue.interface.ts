@@ -25,3 +25,9 @@ export type RIssue = {
 
 export type UpdateIssue = Partial<Omit<IIssue,'reporter_id' | 'status'>>
 
+export type QueryParams = {
+    sort?:'newest' | 'oldest',
+    type?: 'bug' | 'feature_request',
+    status?: 'open' | 'in_progress' | 'resolved',
+}
+
