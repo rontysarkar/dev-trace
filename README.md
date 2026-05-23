@@ -24,6 +24,35 @@ Dev Trace is a backend issue tracking API where users can register, login, and m
 
 ---
 
+## Setup Instructions
+
+### Clone Repository
+```bash
+git clone <repository-url>
+cd dev-trace
+```
+
+### Install Dependencies
+```bash
+npm install
+```
+
+### Environment Variables
+Create a `.env` file:
+
+```env
+PORT=5000
+DATABASE_URL=your_database_url
+JWT_SECRET=your_secret
+```
+
+### Run Project
+```bash
+npm run dev
+```
+
+---
+
 ## API Endpoints
 
 ### Auth
@@ -50,4 +79,4 @@ Dev Trace is a backend issue tracking API where users can register, login, and m
 | role | status |
 | created_at | reporter_id |
 | updated_at | created_at |
-|  | updated_at 
+|            | updated_at |
